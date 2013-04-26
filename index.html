@@ -1,0 +1,370 @@
+<!doctype html>
+<html>
+<head>
+<title>Zygote Body</title>
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
+<!-- jQuery -->
+<link type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" rel="Stylesheet" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+
+<!-- o3v styles -->
+<link type="text/css" href="main_ui.css" rel="Stylesheet" />
+<link rel="stylesheet" type="text/css" href="/css/general.css"></link>
+
+<!-- Local -->
+<script type="text/javascript">
+  var o3v = {};  // open-3d-viewer namespace
+</script>
+
+<!-- Webgl -->
+<script type="text/javascript" src="scripts/gl-matrix-min.js"></script>
+<script type="text/javascript" src="scripts/webgl.js"></script>
+<script type="text/javascript" src="scripts/loader.js"></script>
+<script type="text/javascript" src="scripts/renderer.js"></script>
+<script type="text/javascript" src="scripts/webgl_util.js"></script>
+
+<!-- o3v specific -->
+<script type="text/javascript" src="scripts/common.js"></script>
+<script type="text/javascript" src="scripts/models.js"></script>
+<script type="text/javascript" src="scripts/entities.js"></script>
+<script type="text/javascript" src="scripts/content.js"></script>
+<script type="text/javascript" src="scripts/layer.js"></script>
+<script type="text/javascript" src="scripts/history.js"></script>
+<script type="text/javascript" src="scripts/layers_ui.js"></script>
+<script type="text/javascript" src="scripts/gestures.js"></script>
+<script type="text/javascript" src="scripts/select.js"></script>
+<script type="text/javascript" src="scripts/label.js"></script>
+<script type="text/javascript" src="scripts/nav_ui.js"></script>
+<script type="text/javascript" src="scripts/navigate.js"></script>
+<script type="text/javascript" src="scripts/input_handler.js"></script>
+<script type="text/javascript" src="scripts/search.js"></script>
+<script type="text/javascript" src="scripts/select.js"></script>
+<script type="text/javascript" src="scripts/interpolant.js"></script>
+<script type="text/javascript" src="scripts/opacity.js"></script>
+<script type="text/javascript" src="scripts/main_ui.js"></script>
+<script type="text/javascript" src="scripts/render_interface.js"></script>
+<script type="text/javascript" src="scripts/viewer.js"></script>
+
+<script type="text/javascript">
+  <!-- Start viewer. -->
+  $(document).ready(function() {
+    // The assignment to window.viewer_ is ONLY for debugging.
+    // This variable should NEVER be accessed from code.
+    window.viewer_ = new o3v.Viewer();
+  });
+</script>
+
+<link href="/facebox/facebox.css" media="screen" rel="stylesheet" type="text/css"/>
+<script src="/facebox/facebox.js" type="text/javascript"></script> 
+
+<!-- Facebox popups for links -->
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+	  jQuery('a[rel*=facebox]').facebox();
+	  jQuery('.validationmsg').hide();
+	  
+	  	  
+	}); 
+	
+	function validateContactForm(){
+		jQuery('.validationmsg').hide();
+		var valid = true;
+		
+		if(jQuery(jQuery('.fname')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-fname')[1]).show();
+			valid = false;
+		}
+		
+		if(jQuery(jQuery('.lname')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-lname')[1]).show();
+			valid = false;
+		}
+		
+		if(jQuery(jQuery('.phone')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-phone')[1]).show();
+			valid = false;
+		}
+		
+		if(jQuery(jQuery('.country')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-country')[1]).show();
+			valid = false;
+		}
+		
+		if(jQuery(jQuery('.message')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-message')[1]).show();
+			valid = false;
+		}
+		
+		if(jQuery(jQuery('.email')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-email-required')[1]).show();
+			valid = false;
+			return valid;
+		}
+		
+		if(jQuery(jQuery('.email')[1]).val().length > 0){
+			var pattern = new RegExp(/^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i);
+			if(pattern.test(jQuery(jQuery('.email')[1]).val()) == false){
+				jQuery(jQuery('.msg-email-invalid')[1]).show();
+				valid = false;
+			}
+		}
+		
+		if(jQuery(jQuery('.captcha_code')[1]).val().length <= 0){
+			jQuery(jQuery('.msg-captcha-required')[1]).show();
+			valid = false;
+			return valid;
+		} else {
+			jQuery.ajax({
+				type: 'POST',
+				url:'submit-contact.php',
+				data:{validate:jQuery(jQuery('.captcha_code')[1]).val()},
+				success: function(data, textStatus){
+					if(data.valid != 'true'){
+						jQuery(jQuery('.msg-captcha-invalid')[1]).show();
+						jQuery('.captcha')[1].src = '/inc/securimage/securimage_show.php?' + Math.random();
+						valid = false;
+					}
+				},
+				dataType: 'json',
+				async: false
+			});
+		}
+		
+		return valid;
+	}
+	
+	function submitContactForm(){
+		jQuery.post('submit-contact.php',
+		{
+			fname:jQuery(jQuery('.fname')[1]).val(),
+			lname:jQuery(jQuery('.lname')[1]).val(),
+			country:jQuery(jQuery('.country')[1]).val(),
+			company:jQuery(jQuery('.company')[1]).val(),
+			title:jQuery(jQuery('.title')[1]).val(),
+			phone:jQuery(jQuery('.phone')[1]).val(),
+			email:jQuery(jQuery('.email')[1]).val(),
+			message:jQuery(jQuery('.message')[1]).val()
+		},
+		function(){
+			jQuery(jQuery('.contact-form')[1]).html('<h2>Thanks!</h2><p>Your message has been sent.</p>');
+		});
+	}
+	
+	function switchTo(window){
+		jQuery(document).trigger('close.facebox');
+		
+		function clicky(){
+			jQuery('#link-'+window).trigger('click');
+		}
+		
+		setTimeout(clicky,500);			
+	}
+</script>
+
+<!--- Share This --->
+<script type="text/javascript">var switchTo5x=true;</script><script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+<script type="text/javascript">stLight.options({publisher:'29cadf5c-542d-4472-ab08-d4120db4ed27'});</script>
+
+		<script type="text/javascript">
+
+		  var _gaq = _gaq || [];
+		  _gaq.push(['_setAccount', 'UA-26176022-1']);
+		  _gaq.push(['_setDomainName', 'zygotebody.com']);
+		  _gaq.push(['_setAllowLinker', true]);
+		  _gaq.push(['_trackPageview']);
+		
+		  (function() {
+		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+		
+		</script>
+
+</head>
+
+<body>
+
+<!-- Canvas for verifying webgl -->
+<!-- TODO(dkogan): dynamically create this -->
+<canvas id="gltest" style="display:none"></canvas>
+
+<!-- Container for labels -->
+<!-- TODO(dkogan): dynamically create this and use css -->
+<div id="labelcontainer" style="width:0px; height:0px; left:0px; top:0px; position:absolute; z-index:1"></div>
+
+<div id="attrib_zy" class="attrib_zy">
+	<div id="footer-left">
+		<div id="sharethis"><div style="float:left; margin:3px 3px 0 0; ">Share </div><div style="float:left; width:54px; height:25px; overflow:hidden; margin-top:-2px; "><span  class='st_fblike_hcount' ></span></div><div style="float:left;"><span  class='st_twitter_button' displayText='Tweet'></span></div><div style="float:left; margin-top:1px;"><span  class='st_plusone_button' ></span></div></div>
+		<span style="font-weight:bold;">Follow</span>&nbsp;&nbsp;<a href="http://facebook.com/zygotebody" target="_blank"><img src="/images/social-facebook.png" alt="Facebook" /></a>&nbsp;&nbsp;<a href="http://twitter.com/zygotebody" target="_blank"><img src="/images/social-twitter.png" alt="Twitter" /></a>&nbsp;<!--&nbsp;<a href="#newsletter" rel="facebox"><img src="/images/social-newsletter.png" alt="Newsletter" /></a>&nbsp;&nbsp;-->&nbsp;&nbsp;<span style="color: #999;">|</span>&nbsp;&nbsp;&nbsp;
+	</div>
+	<div id="footer-right">
+		<a href="#note" rel="facebox">Note from Zygote</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#terms" rel="facebox">Terms of Use</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#about" rel="facebox" id="link-about">About Zygote</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#contact" rel="facebox" id="link-contact">Contact</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<a href="#feedback" rel="facebox">Feedback</a>
+	</div>
+</div>
+
+<div id="copyright">Zygote Body&trade; &amp; 3D Data &copy; 2012 Zygote Media Group, Inc.</div>
+
+<!-- Quick help panel -->
+
+<a href="#help" rel="facebox" id="link-help"><img id="help-hidden" class="help-hidden" src="/images/help.png" alt="?" /></a>
+<div id="opac_idx" style="display:none;left:50%;top:100%;position:absolute;margin-top:-50px;color:#06F;z-index:3;margin-left:-89px"></div>
+
+<div id="r0" class="indicator"> </div>
+<div id="r1" class="indicator"> </div>
+<div id="r2" class="indicator"> </div>
+<div id="r3" class="indicator"> </div>
+<div id="r4" class="indicator"> </div>
+<div id="r5" class="indicator"> </div>
+<div id="r6" class="indicator"> </div>
+<div id="r7" class="indicator"> </div>
+
+<div id="loading-feedback" class="loading-feedback">
+	<label>LOADING</label>
+	<div><span id="loading-bar" style="width: 0px;"></span></div>
+</div>
+
+<!-- html for popups -->
+<div id="note" class="pop">
+<div id="bg-note">
+	<h1>A Note From Zygote Media Group, Inc.</h1>
+	<div style="width: 60%;">
+		<p>Thank you for using Zygote Body&trade;!</p>
+		<p>We are excited to release the first version of Zygote Body&trade; and look forward to what the future holds. Zygote is committed to supporting and developing Zygote Body&trade;, making the Zygote Body&trade; online experience even better.</p>
+		<ul>
+			<li><a href="http://www.zygote.com" target="_blank">Learn more about Zygote Media Group, Inc.'s 3D products and services</a></li>
+			<li><a href="#" onclick="switchTo('contact'); return false;">Inquire about business opportunities related to Zygote Body</a></li>
+			<li><a href="http://www.3danatomy.jp" target="_blank">日本語サイト</a></li>
+		</ul>
+	</div>
+</div>
+</div>
+
+<div id="terms" class="pop">
+	<h1>Zygote Body&trade; Terms of Use</h1>
+	<iframe src="inc/terms.html" width="600" height="500" frameborder="0" marginheight="0" marginwidth="0">
+	</iframe>
+</div>
+
+<div id="feedback" class="pop">
+	<iframe src="https://docs.google.com/spreadsheet/embeddedform?formkey=dFgzU2ZSeEh5ZVNvYXpwY1diQ0xUREE6MQ" width="600" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+</div>
+
+
+<div id="about" class="pop">
+	<div id="bg-about">
+	<h1>About Zygote&trade;</h1>
+	<div style="width: 60%;">
+		<p>Zygote Media Group, Inc. was founded in 1994 and has been creating the world's leading 3D anatomical products ever since.</p>
+		<p>3D anatomical products from Zygote have been seen in groundbreaking applications online, in broadcast television, films, computer games, educational software, and in medical illustrations and animations.</p>
+		<p>Zygote is devoted to showing the world the beauty and miracle of human life through its 3D anatomy products.</p>
+		<p><a href="http://zygote.com" target="_blank">Learn more about Zygote products</a></p>
+	</div>
+	</div>
+</div>
+
+<div id="contact" class="pop">
+	<div id="bg-contact">
+	<div style="width: 55%;">
+	<h1 style="padding-top:10px;">Contact Us</h1>				
+	<p>Ideally situated in beautiful American Fork City, Utah, Zygote is located just minutes from Salt Lake City, Park City, and the famous Sundance Resort. Zygote benefits from several nearby universities and a strong local IT community.</p>
+	<p><b>Zygote Media Group, Inc.</b><br />
+		1045 S. 500 E. STE 200<br />
+		American Fork, UT 84003<br />
+		801-765-4141<br />
+		<a href="http://www.zygote.com" target="_blank">www.zygote.com</a><br />
+		<a href="http://www.3dscience.com" target="_blank">www.3dscience.com</a><br />
+		<a href="http://www.3danatomy.jp" target="_blank">日本語サイト</a><br/></p>
+	</div>
+	
+	<form action="" method="post" name="contact" id="contact-form" class="contact-form" onsubmit="if(validateContactForm()){ submitContactForm(); } return false; ">
+		<table>
+		  <tr>
+		    <td><b>First Name*</b><br />
+		<input type="text" name="fname" tabindex="1" class="fname" />
+		<br /><span class="validationmsg msg-fname">This field is required.</span></td>
+		    <td><b>Last Name*</b><br />
+		<input type="text" name="lname" tabindex="1" class="lname" />
+		<br /><span class="validationmsg msg-lname">This field is required.</span></td>
+		    <td><b>Phone Number*</b><br />
+		      <input type="text" name="phone" tabindex="3" class="phone" />
+		      <br /><span class="validationmsg msg-phone">This field is required.</span></td>
+	      </tr>
+		  <tr>
+		    <td><b>Email*</b><br />
+		      <input type="text" name="email" tabindex="4" class="email" />
+		      <br /><span class="validationmsg msg-email-required">This field is required.</span> <span class="validationmsg msg-email-invalid">This address is invalid.</span></td>
+		    <td><b>Country*</b><br />
+		      <input type="text" name="country" tabindex="5" class="country" />
+		      <br /><span class="validationmsg msg-country">This field is required.</span></td>
+		    <td>&nbsp;</td>
+	      </tr>
+		  <tr>
+		    <td><b>Company</b><br />
+		<input type="text" name="company" tabindex="6" class="company" /></td>
+		    <td><b>Job Title</b><br />
+		      <input type="text" name="title" tabindex="7" class="title" /></td>
+		    <td>&nbsp;</td>
+	      </tr>
+  </table>
+		<p style="margin:0;"><b>What are you contacting us about?</b><br />
+		  <textarea name="message2" cols="60" rows="3" tabindex="8" class="message"></textarea>
+        <br /><span class="validationmsg msg-message">This field is required.</span></p>
+        
+				<div id="captcha_container" style="width:210px;">
+			<img id="captcha" class="captcha" src="/inc/securimage/securimage_show.php" alt="CAPTCHA Image" style="width:175px; float:left; margin:0 0 1px 2px; border:1px solid #999;" />
+			<a href="#" onclick="jQuery('.captcha')[1].src = '/inc/securimage/securimage_show.php?' + Math.random(); return false" style="float:left;"><img src="/inc/securimage/images/refresh.gif" alt="Refresh" style="float:left;" /></a>
+			<object style="float:left;" type="application/x-shockwave-flash" data="/inc/securimage/securimage_play.swf?audio_file=/inc/securimage/securimage_play.php&amp;bgColor1=#fff&amp;bgColor2=#fff&amp;iconColor=#777&amp;borderWidth=1&amp;borderColor=#000" width="19" height="19">
+
+				<param name="movie" value="/inc/securimage/securimage_play.swf?audio_file=/inc/securimage/securimage_play.php&amp;bgColor1=#fff&amp;bgColor2=#fff&amp;iconColor=#777&amp;borderWidth=1&amp;borderColor=#000" />
+			</object>
+			<input type="text" name="captcha_code" id="captcha_code" class="captcha_code" size="10" maxlength="6" />
+			<br /><span class="validationmsg msg-captcha-required">This field is required.</span><span class="validationmsg msg-captcha-invalid">This field is incorrect.</span>
+		</div>
+		
+		<input type="submit" value="submit" />
+</form>
+	
+	</div>
+</div>
+
+<div id="help" class="pop">
+	<div id="help-content">
+		<b>Quick guide ('?' to toggle)</b>
+		<br>
+		<br>
+		<b>Navigation</b>
+		<li>Click+drag with the mouse to rotate, scroll to zoom.
+		<li>Or use the buttons in the upper left. The Home button resets the view.
+		<li>Or use the arrow keys and Page Up / Page Down. The Home key resets the view.
+		<br>
+		<br>
+		<b>Slider</b>
+		<li>Use the opacity slider on the left to reveal layers.
+		<li>Click on the toggle below the slider to control layers individually.
+		<br>
+		<br>
+		<b>Selection</b>
+		<li>Use the searchbox at the upper right to search, or click on entities to select them.
+		<li>Click on the background or on a label to undo selection.
+		<li>Ctrl+click on entities or labels to hide entities. (Cmd+click on mac.)
+		<li>Shift+click on entities or labels (or click on the 'pin' icon in a label) to pin an entity. This will keep it selected while you select more.
+		<li>Some entities can be expanded by clicking on the 'plus' on a label.
+		<br>
+		<br>
+		<b>Models</b>
+		<li>Use the model button at the top of the slider to switch models (if others available).
+	</div>
+</div>
+
+<div id="newsletter" class="pop">
+</div>
+
+</body>
+</html>
